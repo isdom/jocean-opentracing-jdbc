@@ -58,8 +58,10 @@ public class TracingDriver implements Driver {
   public TracingDriver() {
       if (null != INSTANCE) {
           this.tracer = INSTANCE.tracer;
+          LOG.info("TracingDriver {} created, and copy tracer {} from INSTANCE", this, this.tracer);
+      } else {
+          LOG.info("TracingDriver {} created with null tracer", this);
       }
-      LOG.info("TracingDriver {} created", this);
   }
 
   @Override
@@ -80,6 +82,8 @@ public class TracingDriver implements Driver {
     // find the real driver for the URL
     final Driver wrappedDriver = findDriver(realUrl);
     final Connection connection = wrappedDriver.connect(realUrl, info);
+
+    LOG.info("{} invoke connect with tracer {}", this, tracer);
 
     return new TracingConnection(connection, dbType, dbUser, url.contains(WITH_ACTIVE_SPAN_ONLY),
         extractIgnoredStatements(url), tracer);
@@ -120,6 +124,7 @@ public class TracingDriver implements Driver {
 
   public void setTracer(final Tracer tracer) {
     this.tracer = tracer;
+    LOG.info("{} invoke setTracer with tracer {}", this, this.tracer);
   }
 
   protected String getUrlPrefix() {
