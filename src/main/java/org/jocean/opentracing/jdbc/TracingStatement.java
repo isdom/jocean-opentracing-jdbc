@@ -24,10 +24,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.opentracing.Scope;
 import io.opentracing.Tracer;
 
 public class TracingStatement implements Statement {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TracingStatement.class);
 
   private final Statement statement;
   private final String query;
@@ -69,12 +74,14 @@ public class TracingStatement implements Statement {
     final Scope scope = buildScope("Query", sql, dbType, dbUser, withActiveSpanOnly, ignoredStatements,
         tracer);
     try {
+        LOG.info("executeQuery: tracer:{}/span:{}",tracer, scope.span());
       return statement.executeQuery(sql);
     } catch (final Exception e) {
       JdbcTracingUtils.onError(e, scope.span());
       throw e;
     } finally {
       scope.close();
+      LOG.info("executeQuery finally block: tracer:{}/span:{}",tracer, scope.span());
     }
   }
 
@@ -83,12 +90,14 @@ public class TracingStatement implements Statement {
     final Scope scope = buildScope("Update", sql, dbType, dbUser, withActiveSpanOnly, ignoredStatements,
         tracer);
     try {
+        LOG.info("executeUpdate: tracer:{}/span:{}",tracer, scope.span());
       return statement.executeUpdate(sql);
     } catch (final Exception e) {
       JdbcTracingUtils.onError(e, scope.span());
       throw e;
     } finally {
       scope.close();
+      LOG.info("executeUpdate finally block: tracer:{}/span:{}",tracer, scope.span());
     }
   }
 
@@ -157,12 +166,14 @@ public class TracingStatement implements Statement {
     final Scope scope = buildScope("Execute", sql, dbType, dbUser, withActiveSpanOnly, ignoredStatements,
         tracer);
     try {
+        LOG.info("execute: tracer:{}/span:{}",tracer, scope.span());
       return statement.execute(sql);
     } catch (final Exception e) {
       JdbcTracingUtils.onError(e, scope.span());
       throw e;
     } finally {
       scope.close();
+      LOG.info("execute finally block: tracer:{}/span:{}",tracer, scope.span());
     }
   }
 
