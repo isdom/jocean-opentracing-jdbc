@@ -13,40 +13,47 @@
  */
 package org.jocean.opentracing.jdbc;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.noop.NoopScopeManager.NoopScope;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 
 class JdbcTracingUtils {
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcTracingUtils.class);
 
   static final String COMPONENT_NAME = "java-jdbc";
 
-  static Scope buildScope(String operationName,
-      String sql,
-      String dbType,
-      String dbUser,
-      boolean withActiveSpanOnly,
-      Set<String> ignoredStatements,
-      Tracer tracer) {
-    Tracer currentTracer = getNullsafeTracer(tracer);
+  static Scope buildScope(final String operationName,
+      final String sql,
+      final String dbType,
+      final String dbUser,
+      final boolean withActiveSpanOnly,
+      final Set<String> ignoredStatements,
+      final Tracer tracer) {
+    final Tracer currentTracer = getNullsafeTracer(tracer);
     if (withActiveSpanOnly && currentTracer.activeSpan() == null) {
       return NoopScope.INSTANCE;
     } else if (ignoredStatements != null && ignoredStatements.contains(sql)) {
       return NoopScope.INSTANCE;
     }
 
-    Tracer.SpanBuilder spanBuilder = currentTracer.buildSpan(operationName)
+    final Tracer.SpanBuilder spanBuilder = currentTracer.buildSpan(operationName)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
 
-    Scope scope = spanBuilder.startActive(true);
+    final Scope scope = spanBuilder.startActive(true);
     decorate(scope.span(), sql, dbType, dbUser);
+
+    LOG.info("buildScope: tracer:{}/span:{}", currentTracer, scope.span());
 
     return scope;
   }
@@ -58,10 +65,10 @@ class JdbcTracingUtils {
     return tracer;
   }
 
-  private static void decorate(Span span,
-      String sql,
-      String dbType,
-      String dbUser) {
+  private static void decorate(final Span span,
+      final String sql,
+      final String dbType,
+      final String dbUser) {
     Tags.COMPONENT.set(span, COMPONENT_NAME);
     Tags.DB_STATEMENT.set(span, sql);
     Tags.DB_TYPE.set(span, dbType);
@@ -70,7 +77,7 @@ class JdbcTracingUtils {
     }
   }
 
-  static void onError(Throwable throwable, Span span) {
+  static void onError(final Throwable throwable, final Span span) {
     Tags.ERROR.set(span, Boolean.TRUE);
 
     if (throwable != null) {
@@ -78,8 +85,8 @@ class JdbcTracingUtils {
     }
   }
 
-  private static Map<String, Object> errorLogs(Throwable throwable) {
-    Map<String, Object> errorLogs = new HashMap<>(2);
+  private static Map<String, Object> errorLogs(final Throwable throwable) {
+    final Map<String, Object> errorLogs = new HashMap<>(2);
     errorLogs.put("event", Tags.ERROR.getKey());
     errorLogs.put("error.object", throwable);
     return errorLogs;
