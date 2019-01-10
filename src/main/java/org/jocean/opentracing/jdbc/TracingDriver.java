@@ -56,8 +56,10 @@ public class TracingDriver implements Driver {
   protected Tracer tracer;
 
   public TracingDriver() {
+      if (null != INSTANCE) {
+          this.tracer = INSTANCE.tracer;
+      }
       LOG.info("TracingDriver {} created", this);
-      this.tracer = INSTANCE.tracer;
   }
 
   @Override
