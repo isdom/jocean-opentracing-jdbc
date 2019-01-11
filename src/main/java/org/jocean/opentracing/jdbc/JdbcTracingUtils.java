@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.jocean.opentracing.TracingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,9 +59,10 @@ class JdbcTracingUtils {
     return scope;
   }
 
-  private static Tracer getNullsafeTracer(final Tracer tracer) {
+  private static Tracer getNullsafeTracer(Tracer tracer) {
     if (tracer == null) {
-      return GlobalTracer.get();
+        tracer = TracingUtil.get();
+        return tracer != null ? tracer : GlobalTracer.get();
     }
     return tracer;
   }
