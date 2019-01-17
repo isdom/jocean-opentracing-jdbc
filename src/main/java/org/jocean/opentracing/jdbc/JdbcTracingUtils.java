@@ -41,23 +41,34 @@ class JdbcTracingUtils {
       final boolean withActiveSpanOnly,
       final Set<String> ignoredStatements,
       final Tracer tracer) {
-    final Tracer currentTracer = getNullsafeTracer(tracer);
-    if (withActiveSpanOnly && currentTracer.activeSpan() == null) {
-      return NoopScope.INSTANCE;
-    } else if (ignoredStatements != null && ignoredStatements.contains(sql)) {
-      return NoopScope.INSTANCE;
-    }
-
-    final Tracer.SpanBuilder spanBuilder = currentTracer.buildSpan(operationName)
-        .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
-
-    final Scope scope = spanBuilder.startActive(true);
-    decorate(scope.span(), sql, dbType, dbUser);
-
-    LOG.info("buildScope: tracer:{}/span:{}", currentTracer, scope.span());
-
-    return scope;
+      return buildScope(operationName, sql, dbType, dbUser, withActiveSpanOnly, ignoredStatements, tracer, null);
   }
+
+  static Scope buildScope(final String operationName,
+          final String sql,
+          final String dbType,
+          final String dbUser,
+          final boolean withActiveSpanOnly,
+          final Set<String> ignoredStatements,
+          final Tracer tracer,
+          final Map<String, Object> tags) {
+        final Tracer currentTracer = getNullsafeTracer(tracer);
+        if (withActiveSpanOnly && currentTracer.activeSpan() == null) {
+          return NoopScope.INSTANCE;
+        } else if (ignoredStatements != null && ignoredStatements.contains(sql)) {
+          return NoopScope.INSTANCE;
+        }
+
+        final Tracer.SpanBuilder spanBuilder = currentTracer.buildSpan(operationName)
+            .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
+
+        final Scope scope = spanBuilder.startActive(true);
+        decorate(scope.span(), sql, dbType, dbUser, tags);
+
+        LOG.info("buildScope: tracer:{}/span:{}", currentTracer, scope.span());
+
+        return scope;
+      }
 
   private static Tracer getNullsafeTracer(Tracer tracer) {
     if (tracer == null) {
@@ -70,12 +81,24 @@ class JdbcTracingUtils {
   private static void decorate(final Span span,
       final String sql,
       final String dbType,
-      final String dbUser) {
+      final String dbUser,
+      final Map<String, Object> tags) {
     Tags.COMPONENT.set(span, COMPONENT_NAME);
     Tags.DB_STATEMENT.set(span, sql);
     Tags.DB_TYPE.set(span, dbType);
     if (dbUser != null) {
       Tags.DB_USER.set(span, dbUser);
+    }
+    if (null != tags) {
+        for (final Map.Entry<String, Object> entry : tags.entrySet()) {
+            if (entry.getValue() instanceof Boolean) {
+                span.setTag(entry.getKey(), ((Boolean)entry.getValue()).booleanValue());
+            } else if (entry.getValue() instanceof Number) {
+                span.setTag(entry.getKey(), ((Number)entry.getValue()));
+            } else {
+                span.setTag(entry.getKey(), null != entry.getValue() ? entry.getValue().toString() : "(null)");
+            }
+        }
     }
   }
 
