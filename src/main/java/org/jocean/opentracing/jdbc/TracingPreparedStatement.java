@@ -81,7 +81,7 @@ public class TracingPreparedStatement extends TracingStatement implements Prepar
     final Scope scope = buildScope("Query", query, dbType, dbUser, withActiveSpanOnly, ignoredQueries,
         tracer, params);
     try {
-        LOG.info("executeQuery: tracer:{}/span:{}", tracer, scope.span());
+        LOG.debug("executeQuery: tracer:{}/span:{}", tracer, scope.span());
       return preparedStatement.executeQuery();
     } catch (final Exception e) {
       JdbcTracingUtils.onError(e, scope.span());
@@ -96,7 +96,7 @@ public class TracingPreparedStatement extends TracingStatement implements Prepar
     final Scope scope = buildScope("Update", query, dbType, dbUser, withActiveSpanOnly, ignoredQueries,
         tracer, params);
     try {
-        LOG.info("executeUpdate: tracer:{}/span:{}", tracer, scope.span());
+        LOG.debug("executeUpdate: tracer:{}/span:{}", tracer, scope.span());
       return preparedStatement.executeUpdate();
     } catch (final Exception e) {
       JdbcTracingUtils.onError(e, scope.span());
@@ -236,7 +236,7 @@ public class TracingPreparedStatement extends TracingStatement implements Prepar
     final Scope scope = buildScope("Execute", query, dbType, dbUser, withActiveSpanOnly,
         ignoredQueries, tracer, params);
     try {
-        LOG.info("execute: tracer:{}/span:{}", tracer, scope.span());
+        LOG.debug("execute: tracer:{}/span:{}", tracer, scope.span());
       return preparedStatement.execute();
     } catch (final Exception e) {
       JdbcTracingUtils.onError(e, scope.span());

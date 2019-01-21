@@ -65,7 +65,7 @@ class JdbcTracingUtils {
         final Scope scope = spanBuilder.startActive(true);
         decorate(scope.span(), sql, dbType, dbUser, tags);
 
-        LOG.info("buildScope: tracer:{}/span:{}", currentTracer, scope.span());
+        LOG.debug("buildScope: tracer:{}/span:{}", currentTracer, scope.span());
 
         return scope;
       }
