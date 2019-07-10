@@ -82,12 +82,12 @@ public class TracingPreparedStatement extends TracingStatement implements Prepar
         tracer, params);
     try {
         LOG.debug("executeQuery: tracer:{}/span:{}", tracer, scope.span());
-      return preparedStatement.executeQuery();
+        return preparedStatement.executeQuery();
     } catch (final Exception e) {
-      JdbcTracingUtils.onError(e, scope.span());
-      throw e;
+        JdbcTracingUtils.onError(e, scope.span());
+        throw e;
     } finally {
-      scope.close();
+        scope.close();
     }
   }
 
@@ -97,12 +97,12 @@ public class TracingPreparedStatement extends TracingStatement implements Prepar
         tracer, params);
     try {
         LOG.debug("executeUpdate: tracer:{}/span:{}", tracer, scope.span());
-      return preparedStatement.executeUpdate();
+        return preparedStatement.executeUpdate();
     } catch (final Exception e) {
-      JdbcTracingUtils.onError(e, scope.span());
-      throw e;
+        JdbcTracingUtils.onError(e, scope.span());
+        throw e;
     } finally {
-      scope.close();
+        scope.close();
     }
   }
 
@@ -237,12 +237,12 @@ public class TracingPreparedStatement extends TracingStatement implements Prepar
         ignoredQueries, tracer, params);
     try {
         LOG.debug("execute: tracer:{}/span:{}", tracer, scope.span());
-      return preparedStatement.execute();
+        return preparedStatement.execute();
     } catch (final Exception e) {
-      JdbcTracingUtils.onError(e, scope.span());
-      throw e;
+        JdbcTracingUtils.onError(e, scope.span());
+        throw e;
     } finally {
-      scope.close();
+        scope.close();
     }
   }
 

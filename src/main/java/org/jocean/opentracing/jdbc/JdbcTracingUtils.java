@@ -16,7 +16,9 @@ package org.jocean.opentracing.jdbc;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.jocean.opentracing.DurationRecorder;
 import org.jocean.opentracing.TracingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +69,28 @@ class JdbcTracingUtils {
 
         LOG.debug("buildScope: tracer:{}/span:{}", currentTracer, scope.span());
 
-        return scope;
+        final DurationRecorder recorder = TracingUtil.getDurationRecorder();
+
+        if (null != recorder) {
+            final long start = System.currentTimeMillis();
+            return new Scope() {
+                @Override
+                public void close() {
+                    scope.close();
+                    recorder.record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS,
+                            "db.type", dbType,
+                            "db.user", null != dbUser ? dbUser : "(unknown)",
+                            "db.operation", operationName);
+                }
+
+                @Override
+                public Span span() {
+                    return scope.span();
+                }};
+        }
+        else {
+            return scope;
+        }
       }
 
   private static Tracer getNullsafeTracer(Tracer tracer) {
