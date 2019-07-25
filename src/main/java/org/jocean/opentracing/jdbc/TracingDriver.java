@@ -132,12 +132,15 @@ public class TracingDriver implements Driver {
     }
 
     for (final Driver candidate : Collections.list(DriverManager.getDrivers())) {
+        LOG.info("test {} using {}", candidate, realUrl);
       try {
         if (candidate.acceptsURL(realUrl)) {
+            LOG.info("test {} success", candidate);
           return candidate;
         }
       } catch (final SQLException ignored) {
         // intentionally ignore exception
+          LOG.warn("test {} failed bcs {}", candidate, ignored);
       }
     }
 
