@@ -18,7 +18,7 @@ configurations {
 // In this section you declare the dependencies for your production and test code
 dependencies {
     /* log */
-    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'org.slf4j:slf4j-api:2.0.6'
     
     compile "io.opentracing:opentracing-util:${opentracingVersion}"
     
